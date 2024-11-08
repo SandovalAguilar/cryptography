@@ -4,6 +4,7 @@ from methods import crypto_methods as cm
 from utils import misc as m
 from utils import entry_validator as e
 from files import file_loader as f
+from tkinter import ttk
 
 
 class CipherWindow:
@@ -15,14 +16,27 @@ class CipherWindow:
         self.encrypt_func = encrypt_func
         self.decrypt_func = decrypt_func
         self.default_size = default_size
+        # Assuming m.create_spanish_alphabet() is defined elsewhere
         self.alphabet = m.create_spanish_alphabet()
 
     def open_window(self):
-        # Create a new window with the title and default size
         window = tk.Toplevel(self.root)
         window.title(self.title)
         window.geometry(self.default_size)
         window.pack_propagate(True)
+
+        # Set up a custom style for the scrollbar
+        style = ttk.Style()
+        style.theme_use('clam')  # Use a theme that allows custom styling
+        style.configure("Custom.Vertical.TScrollbar",
+                        gripcount=0,
+                        background="#333333",  # Dark background for the scrollbar
+                        darkcolor="#333333",   # Darker shade for trough
+                        lightcolor="#666666",  # Lighter shade for active area
+                        # Color of the trough (scrollbar track)
+                        troughcolor="#222222",
+                        bordercolor="#444444",  # Border color around the scrollbar
+                        arrowcolor="white")    # Color of arrows, if any
 
         # Main label
         label = tk.Label(window, text=self.title, font=("Arial", 12, "bold"))
@@ -46,15 +60,20 @@ class CipherWindow:
         output_label = tk.Label(window, text="Resultado:", font=("Arial", 10))
         output_label.pack(pady=5)
 
-        # Use a Text widget instead of Entry for multiline output
-        output_text = tk.Text(window, width=30, height=5,
-                              wrap="word", state="disabled")
-        output_text.pack(pady=5)
+        # Frame for the Text widget and Scrollbar
+        output_frame = tk.Frame(window)
+        output_frame.pack()
 
-        # Add a vertical scrollbar
-        scrollbar = tk.Scrollbar(window, command=output_text.yview)
+        # Use a Text widget for multiline output
+        output_text = tk.Text(output_frame, width=30,
+                              height=5, wrap="word", state="disabled")
+        output_text.grid(row=0, column=0)
+
+        # Add a vertical scrollbar with the custom style
+        scrollbar = ttk.Scrollbar(
+            output_frame, command=output_text.yview, style="Custom.Vertical.TScrollbar")
         output_text.configure(yscrollcommand=scrollbar.set)
-        scrollbar.pack(side="right", fill="y")
+        scrollbar.grid(row=0, column=1, sticky="ns")
 
         def validate_input(raw_input, expected_type):
             """Validates the input against expected type and Spanish alphabet if needed."""
@@ -63,19 +82,18 @@ class CipherWindow:
                 result = e.is_blank(raw_input)
                 if isinstance(result, Exception):
                     return result  # Return exception if validation fails
-                
+
                 # Type validation
                 result = e.validate_type(raw_input, expected_type)
                 if isinstance(result, Exception):
                     return result  # Return exception if validation fails
 
-                
                 # Additional alphabet validation if type is string
                 if expected_type == str:
                     result = e.all_characters_in_alphabet(raw_input)
                     if isinstance(result, Exception):
                         return result  # Return exception if validation fails
-                    
+
                 return raw_input
             except Exception as exp:
                 print(f"Validation Error: {exp}")
@@ -111,7 +129,6 @@ class CipherWindow:
 
             # Display error messages if any validation failed
             if error_messages:
-                # Combine error messages into a single string, separated by newlines
                 combined_error_message = "\n".join(error_messages)
                 display_message(combined_error_message)
             else:
@@ -141,7 +158,8 @@ def open_about_window():
     """
     # Create a new top-level window for "About" information
     about_window = tk.Toplevel(root)
-    about_window.title("Acerca de")  # Set the title of the window to "Acerca de"
+    # Set the title of the window to "Acerca de"
+    about_window.title("Acerca de")
     about_window.geometry("500x400")  # Define window size to 500x400 pixels
 
     # Define a custom font for the title text
@@ -165,7 +183,6 @@ def open_about_window():
     label = tk.Label(about_window, text=info_text,
                      font=("Arial", 10), justify="left")
     label.pack(pady=10, padx=10)  # Add padding around the label for spacing
-
 
 
 def open_source_code_window():
@@ -216,8 +233,10 @@ def open_main_window():
         title="Cifrado de Transposición",
         key_type=str,               # Specifies that the key is a string
         text_type=str,              # Specifies that the text is a string
-        encrypt_func=cm.transposition_cipher,  # Encryption function for Transposition Cipher
-        decrypt_func=cm.transposition_decipher,  # Decryption function for Transposition Cipher
+        # Encryption function for Transposition Cipher
+        encrypt_func=cm.transposition_cipher,
+        # Decryption function for Transposition Cipher
+        decrypt_func=cm.transposition_decipher,
         default_size=default_size
     )
 
@@ -281,4 +300,3 @@ def open_main_window():
 
     # Start the main event loop to run the application
     root.mainloop()
-
