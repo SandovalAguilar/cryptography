@@ -1,0 +1,17 @@
+Cifrado César:
+Es un cifrado de sustitución simple en el que cada letra en el texto original se 
+reemplaza por otra que está un número fijo de posiciones adelante o atrás en el alfabeto.
+Ejemplo: con un desplazamiento de 3, la letra "A" se convierte en "D", "B" en "E", etc.
+
+Cifrado Vigenère:
+Es un cifrado de sustitución polialfabético que utiliza una palabra clave para cifrar el texto.
+Cada letra del texto se desplaza según la posición de la letra correspondiente en la clave, lo 
+que introduce múltiples desplazamientos y aumenta la seguridad.
+Ejemplo: con la clave "LEMON", la primera letra del texto se cifra con "L", la segunda con "E", y
+así sucesivamente.
+
+Cifrado de Transposición:
+Reorganiza el texto original al cambiar la posición de sus caracteres según una secuencia o matriz 
+definida. A diferencia de los cifrados de sustitución, el texto conserva las mismas letras, pero 
+su orden cambia. Ejemplo: el texto "HOLA" puede reordenarse en una matriz y leerse por columnas 
+o filas, dependiendo de la clave de transposición.
