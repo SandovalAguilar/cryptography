@@ -1,3 +1,5 @@
+# ---------- Methods ---------- #
+
 import numpy as np
 from utils import misc as m
 from utils import entry_validator as e
@@ -21,7 +23,7 @@ def transposition_cipher(text: str, key: str) -> str:
     text = m.split_sentence_into_columns(text, columns=len(key))
 
     # Step 2: Sort the key to determine the column rearrangement order
-    indexes = [key.index(char) for char in sorted(list(key))] 
+    indexes = [key.index(char) for char in sorted(list(key))]
 
     # Step 3: Reorder columns in the text according to the sorted key's indexes
     ciphered_array = m.columns_to_words(text[:, indexes])
@@ -63,7 +65,7 @@ def transposition_decipher(text: str, key: str) -> str:
     deciphered_text = [' '.join(row) for row in deciphered_array]
 
     return ' '.join(deciphered_text)
-    
+
 
 def caesar_cipher(text: str, key: int) -> str:
     """
@@ -82,7 +84,7 @@ def caesar_cipher(text: str, key: int) -> str:
     try:
         # Shift each character in the text by the key.
         ciphered_text = [(spanish_alphabet.index((char)) + key) % len(spanish_alphabet)
-                        for char in text]
+                         for char in text]
 
         # Convert the shifted indices back to characters.
         ciphered_text = [spanish_alphabet[index] for index in ciphered_text]
@@ -109,12 +111,13 @@ def caesar_decipher(text: str, key: int) -> str:
     spanish_alphabet = m.create_spanish_alphabet()
 
     try:
-    # Shift each character in the text by the key in the reverse direction.
+        # Shift each character in the text by the key in the reverse direction.
         deciphered_text = [(spanish_alphabet.index((char)) - key) % len(spanish_alphabet)
-                       for char in text]
+                           for char in text]
 
     # Convert the shifted indices back to characters.
-        deciphered_text = [spanish_alphabet[index] for index in deciphered_text]
+        deciphered_text = [spanish_alphabet[index]
+                           for index in deciphered_text]
     except Exception as exp:
         print(exp)
         return e.InvalidKeyError()
@@ -143,7 +146,7 @@ def vigenere_cipher(text: str, key: str) -> str:
 
     # Encrypt the text:
     # For each character in the text, shift it by the position of the corresponding key character in the alphabet.
-    ciphered_text = [(spanish_alphabet.index((text[index])) + (spanish_alphabet.index((key[index])))) 
+    ciphered_text = [(spanish_alphabet.index((text[index])) + (spanish_alphabet.index((key[index]))))
                      % len(spanish_alphabet) for index in range(len(text))]
 
     # Convert the shifted indices back to characters.
@@ -173,7 +176,7 @@ def vigenere_decipher(text: str, key: str) -> str:
 
     # Decrypt the text:
     # For each character in the text, shift it by the position of the corresponding key character in reverse.
-    deciphered_text = [(spanish_alphabet.index((text[index])) - (spanish_alphabet.index((key[index])))) 
+    deciphered_text = [(spanish_alphabet.index((text[index])) - (spanish_alphabet.index((key[index]))))
                        % len(spanish_alphabet) for index in range(len(text))]
 
     # Convert the shifted indices back to characters.
@@ -181,4 +184,232 @@ def vigenere_decipher(text: str, key: str) -> str:
 
     # Join the list of characters to form the final decrypted message.
     return ''.join(deciphered_text)
+
+
+# ---------- Custom Modules ---------- #
+
+import numpy as np
+
+
+def lists_to_columns(lists):
+    """
+    Converts a list of strings into a 2D NumPy array, where each string is treated as a row, 
+    and each character in the string is a separate column.
+    Then, it transposes the array, converting rows into columns.
+
+    Parameters:
+    lists (list of str): A list of words or strings where each word represents a row in the resulting array.
+
+    Returns:
+    np.ndarray: A 2D NumPy array where each original word's characters are now columns.
+    """
+    # Convert each word in the list to a list of characters, then create a 2D NumPy array
+    array = np.array([list(word) for word in lists])
+
+    # Transpose the array so rows become columns
+    transposed_array = array.T
+    return transposed_array
+
+
+def word_to_alphabet_positions(word):
+    """
+    Converts each character in a given word to its corresponding position in the alphabet, 
+    assuming 'A' is 0, 'B' is 1, ..., 'Z' is 25.
+    This function is case-insensitive, so it will handle both uppercase and lowercase letters.
+
+    Parameters:
+    word (str): The word to be converted to alphabet positions.
+
+    Returns:
+    list of int: A list of integer positions representing each character's position in the alphabet.
+    """
+    # Convert word to uppercase, then calculate each character's position by subtracting 'A' (ASCII value 65) from the character's ASCII value
+    return [ord(char) - ord('A') for char in word.upper()]
+
+
+def create_spanish_alphabet():
+    """
+    Creates and returns a list containing the uppercase letters of the Spanish alphabet.ß
+
+    Returns:
+    list: A list of characters representing the uppercase Spanish alphabet.
+    """
+    # Create a list of the uppercase Spanish alphabet, including the letter 'Ñ'.
+    alphabet = list("ABCDEFGHIJKLMNÑOPQRSTUVWXYZ")
+
+    # Return the alphabet as a list of characters.
+    return alphabet
+
+
+def fill_text(text, length):
+    """
+    Fills the input text until it reaches the specified length by repeating the original text.
+
+    If the text is shorter than the desired length, it will repeat the text until the length is met.
+    If the desired length is smaller than or equal to the text's length, it will return the original text.
+
+    Parameters:
+    text (str): The text to be filled.
+    length (int): The desired length of the output string.
+
+    Returns:
+    str: The text filled up to the specified length.
+    """
+    # If the length is less than or equal to the original text, return the original text.
+    repeated_text = text[:length] if length <= len(
+        text) else (text * (length // len(text) + 1))[:length]
+
+    return repeated_text
+
+
+def split_sentence_into_columns(sentence, columns):
+    """
+    Splits a sentence into columns, filling each column with consecutive letters from the sentence. 
+    Spaces are removed, and letters are wrapped to fit into rows if needed.
+
+    Parameters:
+    sentence (str): The sentence to be split into columns.
+    columns (int): The number of columns to create.
+
+    Returns:
+    np.ndarray: A 2D NumPy array where each row contains a segment of the sentence, 
+    with letters wrapped as necessary.
+    """
+    # Remove spaces from the sentence and create a NumPy array of letters
+    letters = np.array(list(sentence.replace(" ", "")))
+
+    # Calculate the required number of rows based on the number of columns
+    rows = int(np.ceil(len(letters) / columns))
+
+    # Pad the letters array to ensure it fills the grid fully, wrapping extra letters if needed
+    padded_letters = np.pad(letters, (0, rows * columns - len(letters)), mode='wrap')
+
+    # Reshape the padded array into the specified number of rows and columns
+    result = padded_letters.reshape(rows, columns)
+    return result
+
+
+def columns_to_words(array):
+    """
+    Concatenates characters in each column of a 2D array into words, treating each column as a separate word. 
+    Empty cells are ignored.
+
+    Parameters:
+    array (np.ndarray): A 2D NumPy array where each column represents a separate word to be formed.
+
+    Returns:
+    list of str: A list of words created by concatenating characters in each column.
+    """
+    # Join each character in each column to form a word, ignoring any empty cells
+    words = [''.join([char for char in array[:, i] if char]) for i in range(array.shape[1])]
+    return words
+
+
+# ---------- Entry Validator ---------- #
+
+from utils import misc as m
+
+# Custom exceptions to handle various input validation errors
+
+class NotIntegerError(Exception):
+    """Exception raised when the input is not an integer."""
+    def __init__(self, message="La entrada no es un número entero."):
+        super().__init__(message)
+
+
+class NotStringError(Exception):
+    """Exception raised when the input is not a string."""
+    def __init__(self, message="La entrada no es de tipo texto."):
+        super().__init__(message)
+
+
+class NotInAlphabetError(Exception):
+    """Exception raised when the input contains characters outside the Spanish alphabet."""
+    def __init__(self, message="La entrada contiene caracteres fuera del alfabeto español."):
+        super().__init__(message)
+
+
+class BlankInputError(Exception):
+    """Exception raised when the input is blank or contains only whitespace."""
+    def __init__(self, message="La entrada está vacía o contiene solo espacios en blanco."):
+        super().__init__(message)
+
+
+class NumericStringError(Exception):
+    """Exception raised when the input is a numeric string instead of alphabetic text."""
+    def __init__(self, message="La entrada es de tipo numérico."):
+        super().__init__(message)
+
+
+class InvalidKeyError(Exception):
+    """Exception raised when a key is out of the acceptable range."""
+    def __init__(self, message="La clave está fuera de rango; elija una distinta."):
+        super().__init__(message)
+
+
+# Validation functions for input
+
+def validate_type(raw_input, expected_type):
+    """
+    Validates the type of the input based on the expected type (int or str).
+
+    Parameters:
+        raw_input: The input to be validated.
+        expected_type (type): The expected data type for the input (either int or str).
+
+    Returns:
+        raw_input if the validation is successful.
+        Raises an appropriate Exception if validation fails.
+    """
+    if expected_type is int:
+        try:
+            int(raw_input)
+            return raw_input
+        except ValueError:
+            return NotIntegerError()  # Returns exception if input is not an integer
+
+    elif expected_type is str:
+        if isinstance(raw_input, str) and raw_input.isnumeric():
+            return NumericStringError()  # Returns exception if input is a numeric string
+        else:
+            return raw_input  # Returns the input if it is a valid string
+
+    else:
+        return ValueError("Expected type must be int or str.")
+
+
+def all_characters_in_alphabet(raw_input):
+    """
+    Checks if all characters in the input text are within the Spanish alphabet.
+
+    Parameters:
+        raw_input (str): The input string to validate.
+
+    Returns:
+        raw_input if all characters are within the Spanish alphabet.
+        Raises NotInAlphabetError if validation fails.
+    """
+    alphabet = m.create_spanish_alphabet()  # Gets the Spanish alphabet
+    text_upper = raw_input.upper().replace(' ', '')  # Convert to uppercase and remove spaces
+    if not all(char in alphabet for char in text_upper):
+        return NotInAlphabetError()  # Returns exception if any character is outside the alphabet
+    return raw_input
+
+
+def is_blank(raw_input):
+    """
+    Checks if the input text is blank (i.e., empty or whitespace only).
+
+    Parameters:
+        raw_input (str): The input string to check.
+
+    Returns:
+        raw_input if the input is not blank.
+        Raises BlankInputError if the input is blank.
+    """
+    if raw_input.strip() == "":
+        return BlankInputError()  # Returns exception if input is blank
+    return raw_input
+
+
 

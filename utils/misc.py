@@ -1,11 +1,6 @@
 import numpy as np
 
 
-def generate_pdf():
-    # Aquí iría la funcionalidad para generar el PDF con el código fuente
-    print("Generando PDF con el código fuente...")
-
-
 def lists_to_columns(lists):
     """
     Converts a list of strings into a 2D NumPy array, where each string is treated as a row, 
@@ -97,7 +92,8 @@ def split_sentence_into_columns(sentence, columns):
     rows = int(np.ceil(len(letters) / columns))
 
     # Pad the letters array to ensure it fills the grid fully, wrapping extra letters if needed
-    padded_letters = np.pad(letters, (0, rows * columns - len(letters)), mode='wrap')
+    padded_letters = np.pad(
+        letters, (0, rows * columns - len(letters)), mode='wrap')
 
     # Reshape the padded array into the specified number of rows and columns
     result = padded_letters.reshape(rows, columns)
@@ -116,6 +112,6 @@ def columns_to_words(array):
     list of str: A list of words created by concatenating characters in each column.
     """
     # Join each character in each column to form a word, ignoring any empty cells
-    words = [''.join([char for char in array[:, i] if char]) for i in range(array.shape[1])]
+    words = [''.join([char for char in array[:, i] if char])
+             for i in range(array.shape[1])]
     return words
-

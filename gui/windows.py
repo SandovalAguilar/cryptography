@@ -10,6 +10,18 @@ from tkinter import scrolledtext
 
 class CipherWindow:
     def __init__(self, root, title, key_type, text_type, encrypt_func, decrypt_func, default_size):
+        """
+        Initializes the CipherWindow class with attributes necessary for encryption/decryption.
+
+        Parameters:
+            root (tk.Tk): The main Tkinter root window.
+            title (str): Title of the window.
+            key_type (type): Expected type of key input.
+            text_type (type): Expected type of text input.
+            encrypt_func (callable): Encryption function.
+            decrypt_func (callable): Decryption function.
+            default_size (str): Default size of the window.
+        """
         self.root = root
         self.title = title
         self.key_type = key_type
@@ -17,133 +29,135 @@ class CipherWindow:
         self.encrypt_func = encrypt_func
         self.decrypt_func = decrypt_func
         self.default_size = default_size
-        # Assuming m.create_spanish_alphabet() is defined elsewhere
-        self.alphabet = m.create_spanish_alphabet()
+        self.alphabet = m.create_spanish_alphabet()  # Custom Spanish alphabet
 
     def open_window(self):
+        """
+        Opens a new window with fields for text input, key input, and buttons for encryption/decryption.
+        Sets up a custom scrollbar style, and configures validation and display of encrypted/decrypted results.
+        """
         window = tk.Toplevel(self.root)
         window.title(self.title)
         window.geometry(self.default_size)
         window.pack_propagate(True)
 
-        # Set up a custom style for the scrollbar
+        # Custom scrollbar style for a darker theme
         style = ttk.Style()
-        style.theme_use('clam')  # Use a theme that allows custom styling
+        style.theme_use('clam')
         style.configure("Custom.Vertical.TScrollbar",
                         gripcount=0,
-                        background="#333333",  # Dark background for the scrollbar
-                        darkcolor="#333333",   # Darker shade for trough
-                        lightcolor="#666666",  # Lighter shade for active area
-                        # Color of the trough (scrollbar track)
+                        background="#333333",
+                        darkcolor="#333333",
+                        lightcolor="#666666",
                         troughcolor="#222222",
-                        bordercolor="#444444",  # Border color around the scrollbar
-                        arrowcolor="white")    # Color of arrows, if any
+                        bordercolor="#444444",
+                        arrowcolor="white")
 
-        # Main label
+        # Main label displaying the window title
         label = tk.Label(window, text=self.title, font=("Arial", 12, "bold"))
         label.pack(pady=10)
 
-        # Text input field
+        # Text input field label and entry
         input_label = tk.Label(
             window, text="Introduce el texto:", font=("Arial", 10))
         input_label.pack(pady=5)
         input_entry = tk.Entry(window, width=30)
         input_entry.pack(pady=5)
 
-        # Key input field
+        # Key input field label and entry
         input_label_key = tk.Label(
             window, text="Introduce la clave:", font=("Arial", 10))
         input_label_key.pack(pady=5)
         input_key = tk.Entry(window, width=30)
         input_key.pack(pady=5)
 
-        # Output field with scrollable Text widget
+        # Output area with a label, scrollable text, and custom scrollbar
         output_label = tk.Label(window, text="Resultado:", font=("Arial", 10))
         output_label.pack(pady=5)
-
-        # Frame for the Text widget and Scrollbar
         output_frame = tk.Frame(window)
         output_frame.pack()
-
-        # Use a Text widget for multiline output
         output_text = tk.Text(output_frame, width=30,
                               height=5, wrap="word", state="disabled")
         output_text.grid(row=0, column=0)
-
-        # Add a vertical scrollbar with the custom style
         scrollbar = ttk.Scrollbar(
             output_frame, command=output_text.yview, style="Custom.Vertical.TScrollbar")
         output_text.configure(yscrollcommand=scrollbar.set)
         scrollbar.grid(row=0, column=1, sticky="ns")
 
         def validate_input(raw_input, expected_type):
-            """Validates the input against expected type and Spanish alphabet if needed."""
+            """
+            Validates the input based on type and alphabet constraints, allowing only valid Spanish characters.
+
+            Parameters:
+                raw_input (str): Input to validate.
+                expected_type (type): Expected data type for the input.
+
+            Returns:
+                str or Exception: Validated input or an Exception if validation fails.
+            """
             try:
-                # Blank check
                 result = e.is_blank(raw_input)
                 if isinstance(result, Exception):
-                    return result  # Return exception if validation fails
+                    return result
 
-                # Type validation
                 result = e.validate_type(raw_input, expected_type)
                 if isinstance(result, Exception):
-                    return result  # Return exception if validation fails
+                    return result
 
-                # Additional alphabet validation if type is string
                 if expected_type == str:
                     result = e.all_characters_in_alphabet(raw_input)
                     if isinstance(result, Exception):
-                        return result  # Return exception if validation fails
+                        return result
 
                 return raw_input
             except Exception as exp:
-                print(f"Validation Error: {exp}")
+                print(f"Error de validación: {exp}")
                 return exp
 
         def display_message(message):
-            """Displays a message in the output_text widget."""
-            output_text.config(state="normal")   # Enable editing
-            output_text.delete("1.0", tk.END)    # Clear previous text
-            output_text.insert("1.0", message)   # Insert new message
-            # Disable editing to make it read-only
+            """
+            Displays a message in the output_text widget, clearing previous content.
+
+            Parameters:
+                message (str): Message to display.
+            """
+            output_text.config(state="normal")
+            output_text.delete("1.0", tk.END)
+            output_text.insert("1.0", message)
             output_text.config(state="disabled")
 
         def perform_action(action_func):
-            """Executes the encryption or decryption function after validation."""
+            """
+            Validates inputs, handles errors, and performs encryption or decryption using the given function.
+
+            Parameters:
+                action_func (callable): Function to execute (either encryption or decryption).
+            """
             text = input_entry.get()
             key = input_key.get()
 
-            # Validate text and key with the expected types
             text_result = validate_input(text, self.text_type)
             key_result = validate_input(key, self.key_type)
 
-            # Prepare error messages
             error_messages = []
 
-            # Check if validation for text failed
             if isinstance(text_result, Exception):
                 error_messages.append(f"Texto inválido: {text_result}")
 
-            # Check if validation for key failed
             if isinstance(key_result, Exception):
                 error_messages.append(f"Clave inválida: {key_result}")
 
-            # Display error messages if any validation failed
             if error_messages:
-                combined_error_message = "\n".join(error_messages)
-                display_message(combined_error_message)
+                display_message("\n".join(error_messages))
             else:
-                # If both text and key are valid, proceed with the action function
                 result = action_func(text_result.upper(), key_result.upper(
                 ) if self.key_type == str else int(key_result))
                 display_message(result)
 
-        # Encrypt button
+        # Buttons for encryption and decryption
         encrypt_button = tk.Button(
             window, text="Cifrar", command=lambda: perform_action(self.encrypt_func))
         encrypt_button.pack(pady=10)
-
-        # Decrypt button
         decrypt_button = tk.Button(
             window, text="Descifrar", command=lambda: perform_action(self.decrypt_func))
         decrypt_button.pack(pady=5)
@@ -151,63 +165,42 @@ class CipherWindow:
 
 def open_about_window():
     """
-    Opens a new window to display information about the ciphers, including author details and
-    specific descriptions from a text file. This function configures the window, title, and content.
-
-    Returns:
-    None
+    Opens a window displaying author details and version information, reading further details from a text file.
     """
-    # Create a new top-level window for "About" information
     about_window = tk.Toplevel(root)
-    # Set the title of the window to "Acerca de"
     about_window.title("Acerca de")
-    about_window.geometry("500x400")  # Define window size to 500x400 pixels
+    about_window.geometry("500x400")
 
-    # Define a custom font for the title text
     title_font = font.Font(family="Arial", size=16, weight="bold")
-
-    # Define the author information text
     author_text = """
     Ismael Sandoval Aguilar (2024)\n
     Versión 1.0.1
     """
-
-    # Display the author information in a bold, centered label
     title_label = tk.Label(about_window, text=author_text,
                            font=title_font, anchor="center")
-    title_label.pack(pady=10)  # Add padding around the title label for spacing
+    title_label.pack(pady=10)
 
-    # Read the cipher information from an external file
     info_text = open(f.load_file('info_text', 'txt'), "r").read()
-
-    # Label to display the information text, justified to the left
     label = tk.Label(about_window, text=info_text,
                      font=("Arial", 10), justify="left")
-    label.pack(pady=10, padx=10)  # Add padding around the label for spacing
+    label.pack(pady=10, padx=10)
 
 
 def open_source_code_window():
     """
-    Abre una nueva ventana para mostrar información sobre los cifrados, incluyendo detalles del autor y
-    descripciones específicas desde un archivo de texto. Esta función configura la ventana, título y contenido.
-
-    Returns:
-    None
+    Opens a new window with the source code information, loading content from a text file, 
+    and displaying it in a ScrolledText widget.
     """
-    # Crear una nueva ventana de nivel superior para mostrar la información
     source_code_window = tk.Toplevel(root)
     source_code_window.title("Código fuente")
-    source_code_window.geometry("500x400")  # Tamaño de la ventana
+    source_code_window.geometry("500x400")
 
-    # Leer el contenido de información desde un archivo externo
     info_text = open(f.load_file('source_code', 'txt'), "r").read()
 
-    # Crear el widget ScrolledText para el contenido con barra de desplazamiento
-    text_widget = scrolledtext.ScrolledText(source_code_window, font=("Arial", 10), wrap="word")
-    text_widget.insert("1.0", info_text)  # Insertar el texto en el widget
-    text_widget.config(state="disabled")  # Hacer el contenido de solo lectura
-
-    # Colocar el widget ScrolledText en la ventana
+    text_widget = scrolledtext.ScrolledText(
+        source_code_window, font=("Arial", 10), wrap="word")
+    text_widget.insert("1.0", info_text)
+    text_widget.config(state="disabled")
     text_widget.pack(fill="both", expand=True, padx=10, pady=10)
 
 

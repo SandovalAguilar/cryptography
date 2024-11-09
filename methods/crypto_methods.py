@@ -21,7 +21,7 @@ def transposition_cipher(text: str, key: str) -> str:
     text = m.split_sentence_into_columns(text, columns=len(key))
 
     # Step 2: Sort the key to determine the column rearrangement order
-    indexes = [key.index(char) for char in sorted(list(key))] 
+    indexes = [key.index(char) for char in sorted(list(key))]
 
     # Step 3: Reorder columns in the text according to the sorted key's indexes
     ciphered_array = m.columns_to_words(text[:, indexes])
@@ -63,7 +63,7 @@ def transposition_decipher(text: str, key: str) -> str:
     deciphered_text = [' '.join(row) for row in deciphered_array]
 
     return ' '.join(deciphered_text)
-    
+
 
 def caesar_cipher(text: str, key: int) -> str:
     """
@@ -82,7 +82,7 @@ def caesar_cipher(text: str, key: int) -> str:
     try:
         # Shift each character in the text by the key.
         ciphered_text = [(spanish_alphabet.index((char)) + key) % len(spanish_alphabet)
-                        for char in text]
+                         for char in text]
 
         # Convert the shifted indices back to characters.
         ciphered_text = [spanish_alphabet[index] for index in ciphered_text]
@@ -109,12 +109,13 @@ def caesar_decipher(text: str, key: int) -> str:
     spanish_alphabet = m.create_spanish_alphabet()
 
     try:
-    # Shift each character in the text by the key in the reverse direction.
+        # Shift each character in the text by the key in the reverse direction.
         deciphered_text = [(spanish_alphabet.index((char)) - key) % len(spanish_alphabet)
-                       for char in text]
+                           for char in text]
 
     # Convert the shifted indices back to characters.
-        deciphered_text = [spanish_alphabet[index] for index in deciphered_text]
+        deciphered_text = [spanish_alphabet[index]
+                           for index in deciphered_text]
     except Exception as exp:
         print(exp)
         return e.InvalidKeyError()
@@ -143,7 +144,7 @@ def vigenere_cipher(text: str, key: str) -> str:
 
     # Encrypt the text:
     # For each character in the text, shift it by the position of the corresponding key character in the alphabet.
-    ciphered_text = [(spanish_alphabet.index((text[index])) + (spanish_alphabet.index((key[index])))) 
+    ciphered_text = [(spanish_alphabet.index((text[index])) + (spanish_alphabet.index((key[index]))))
                      % len(spanish_alphabet) for index in range(len(text))]
 
     # Convert the shifted indices back to characters.
@@ -173,7 +174,7 @@ def vigenere_decipher(text: str, key: str) -> str:
 
     # Decrypt the text:
     # For each character in the text, shift it by the position of the corresponding key character in reverse.
-    deciphered_text = [(spanish_alphabet.index((text[index])) - (spanish_alphabet.index((key[index])))) 
+    deciphered_text = [(spanish_alphabet.index((text[index])) - (spanish_alphabet.index((key[index]))))
                        % len(spanish_alphabet) for index in range(len(text))]
 
     # Convert the shifted indices back to characters.
@@ -181,4 +182,3 @@ def vigenere_decipher(text: str, key: str) -> str:
 
     # Join the list of characters to form the final decrypted message.
     return ''.join(deciphered_text)
-
