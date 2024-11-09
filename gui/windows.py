@@ -5,6 +5,7 @@ from utils import misc as m
 from utils import entry_validator as e
 from files import file_loader as f
 from tkinter import ttk
+from tkinter import scrolledtext
 
 
 class CipherWindow:
@@ -186,20 +187,28 @@ def open_about_window():
 
 
 def open_source_code_window():
-    # Crea una nueva ventana para mostrar información sobre el código fuente
+    """
+    Abre una nueva ventana para mostrar información sobre los cifrados, incluyendo detalles del autor y
+    descripciones específicas desde un archivo de texto. Esta función configura la ventana, título y contenido.
+
+    Returns:
+    None
+    """
+    # Crear una nueva ventana de nivel superior para mostrar la información
     source_code_window = tk.Toplevel(root)
-    source_code_window.title("Código Fuente")
-    source_code_window.geometry("500x350")
+    source_code_window.title("Código fuente")
+    source_code_window.geometry("500x400")  # Tamaño de la ventana
 
-    # Etiqueta principal
-    label = tk.Label(source_code_window, text="Generar PDF con el Código Fuente", font=(
-        "Arial", 14, "bold"))
-    label.pack(pady=10)
+    # Leer el contenido de información desde un archivo externo
+    info_text = open(f.load_file('source_code', 'txt'), "r").read()
 
-    # Botón para generar el PDF
-    btn_generate_pdf = tk.Button(
-        source_code_window, text="Generar PDF", command=m.generate_pdf, font=("Arial", 12))
-    btn_generate_pdf.pack(pady=20)
+    # Crear el widget ScrolledText para el contenido con barra de desplazamiento
+    text_widget = scrolledtext.ScrolledText(source_code_window, font=("Arial", 10), wrap="word")
+    text_widget.insert("1.0", info_text)  # Insertar el texto en el widget
+    text_widget.config(state="disabled")  # Hacer el contenido de solo lectura
+
+    # Colocar el widget ScrolledText en la ventana
+    text_widget.pack(fill="both", expand=True, padx=10, pady=10)
 
 
 # Función principal que abre la ventana principal
