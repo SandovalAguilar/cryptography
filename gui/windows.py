@@ -181,9 +181,13 @@ def open_about_window():
     title_label.pack(pady=10)
 
     info_text = open(f.load_file('info_text', 'txt'), "r").read()
-    label = tk.Label(about_window, text=info_text,
-                     font=("Arial", 10), justify="left")
-    label.pack(pady=10, padx=10)
+
+    text_widget = scrolledtext.ScrolledText(
+    about_window, font=("Arial", 12), wrap="word")
+    text_widget.insert("1.0", info_text)
+    text_widget.config(state="disabled")
+    text_widget.pack(fill="both", expand=True, padx=10, pady=10)
+
 
 
 def open_source_code_window():
